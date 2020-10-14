@@ -294,7 +294,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Domi:
                     if (!DelayWatch.IsRunning)
@@ -302,7 +302,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Edge:
                     if (!DelayWatch.IsRunning)
@@ -310,9 +310,9 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID, null);
+                    await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID);
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate2?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate2?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Hush:
                     if (!DelayWatch.IsRunning)
@@ -320,7 +320,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Lush:
                     if (!DelayWatch.IsRunning)
@@ -328,7 +328,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Max:
                     if (!DelayWatch.IsRunning)
@@ -336,9 +336,9 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
                     break;
                 case ToyType.Mission:
                     if (!DelayWatch.IsRunning)
@@ -346,7 +346,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Nora:
                     if (!DelayWatch.IsRunning)
@@ -354,9 +354,9 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Osci:
                     if (!DelayWatch.IsRunning)
@@ -364,7 +364,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Ferri:
                     if (!DelayWatch.IsRunning)
@@ -372,7 +372,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Diamo:
                     if (!DelayWatch.IsRunning)
@@ -380,7 +380,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
                 case ToyType.Quake:
                     if (!DelayWatch.IsRunning)
@@ -388,7 +388,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                         DelayWatch.Start();
                     }
 
-                    response = await client.PostAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID, null);
+                    response = await client.GetAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
                     break;
             }
 
