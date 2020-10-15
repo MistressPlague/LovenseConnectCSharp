@@ -59,7 +59,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         }
 
         /// <summary>
-        /// The Local WebClient To Send HTTP GET/POST Requests.
+        /// The Local WebClient To Send Requests.
         /// </summary>
         private static WebClient client = new WebClient();
 
@@ -159,7 +159,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         }
 
         /// <summary>
-        /// Gets A Instance Of LovenseToy Which Contains Info About The Toy From The url.ToLower().Replace("/gettoys", "")And ID.
+        /// Gets A Instance Of LovenseToy Which Contains Info About The Toy From The URL And ID.
         /// </summary>
         /// <param name="url">The Local Lovense Connect Server URL.</param>
         /// <param name="id">The Toy ID - Fun Fact: This Is The Device's MAC Address.</param>
@@ -256,12 +256,12 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         public static int LastKnownLatency = 225;
 
         /// <summary>
-        /// A Simple "Vibrate This Much" Method Which Will Vibrate The Toy {x} Amount From The Local Lovense Connect Server url.ToLower().Replace("/gettoys", "")And ID Of The Toy.
+        /// A Simple "Vibrate This Much" Method Which Will Vibrate The Toy {x} Amount From The Local Lovense Connect Server URL And ID Of The Toy.
         /// </summary>
         /// <param name="url">The Local Lovense Connect Server URL.</param>
         /// <param name="id">The Toy ID - Fun Fact: This Is The Device's MAC Address.</param>
         /// <param name="amount">The Vibration Intensity.</param>
-        /// <param name="IgnoreDuplicateRequests">Whether To Ignore Duplicate Requests Or not.</param>
+        /// <param name="IgnoreDuplicateRequests">Whether To Ignore Duplicate Requests Or Not.</param>
         /// <returns></returns>
         public async static Task<bool> VibrateToy(string url, string id, int amount, bool IgnoreDuplicateRequests = false)
         {
