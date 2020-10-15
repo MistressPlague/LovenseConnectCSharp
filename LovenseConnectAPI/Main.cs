@@ -23,7 +23,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         {
             #region Debug Info
             public string FirmwareVersion = "0";
-            public string ToyVersion = "0";
+            public string ToyVersion = "";
             #endregion
 
             #region Useful Info
