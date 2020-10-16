@@ -255,6 +255,9 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         /// </summary>
         public static int LastKnownLatency = 225;
 
+        /// <summary>
+        /// Stopwatch Used For Calculating Latency.
+        /// </summary>
         public static Stopwatch DelayWatch = new Stopwatch();
 
         /// <summary>
