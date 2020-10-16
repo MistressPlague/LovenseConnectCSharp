@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -255,6 +255,8 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         /// </summary>
         public static int LastKnownLatency = 225;
 
+        public static Stopwatch DelayWatch = new Stopwatch();
+
         /// <summary>
         /// A Simple "Vibrate This Much" Method Which Will Vibrate The Toy {x} Amount From The Local Lovense Connect Server URL And ID Of The Toy.
         /// </summary>
@@ -286,8 +288,6 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                     return false;
                 }
 
-                IsRequestPending = true;
-
                 if (amount > 20)
                 {
                     amount = 20;
@@ -300,7 +300,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
 
                 string response = null;
 
-                Stopwatch DelayWatch = new Stopwatch();
+                DelayWatch.Reset();
 
                 if (Toys == null || Toys.Count == 0)
                 {
@@ -309,115 +309,75 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
 
                 LovenseToy toy = Toys.Find(o => o.ToyID == id);
 
-                switch (toy.LovenseToyType)
+                IsRequestPending = true;
+
+                if (!DelayWatch.IsRunning)
                 {
-                    case ToyType.None:
+                    DelayWatch.Start();
+                }
+
+                if (toy.LovenseToyType == ToyType.None)
+                {
+                    IsRequestPending = false;
+                    return false; // Assume Toy Disconnected
+                }
+
+                response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
+
+                if (!string.IsNullOrEmpty(response))
+                {
+                    if (!response.ToLower().Contains("\"ok\""))
                     {
+                        CurrentVibrationAmount[id] = amount;
+
                         IsRequestPending = false;
-                        return false; // Assume Toy Disconnected
+
+                        return false;
                     }
-                    case ToyType.Ambi:
-                        if (!DelayWatch.IsRunning)
+                }
+
+                if (toy.LovenseToyType == ToyType.Edge)
+                {
+                    await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID);
+
+                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate2?v=" + amount + "&t=" + toy.ToyID);
+
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        if (!response.ToLower().Contains("\"ok\""))
                         {
-                            DelayWatch.Start();
-                        }
+                            CurrentVibrationAmount[id] = amount;
 
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Domi:
-                        if (!DelayWatch.IsRunning)
+                            IsRequestPending = false;
+
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
+
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        if (!response.ToLower().Contains("\"ok\""))
                         {
-                            DelayWatch.Start();
+                            CurrentVibrationAmount[id] = amount;
+
+                            IsRequestPending = false;
+
+                            return false;
                         }
+                    }
+                }
 
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Edge:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID);
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate2?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Hush:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Lush:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Max:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Mission:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Nora:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Osci:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Ferri:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Diamo:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
-                    case ToyType.Quake:
-                        if (!DelayWatch.IsRunning)
-                        {
-                            DelayWatch.Start();
-                        }
-
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
-                        break;
+                if (toy.LovenseToyType == ToyType.Max)
+                {
+                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
+                }
+                else if (toy.LovenseToyType == ToyType.Nora)
+                {
+                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID);
                 }
 
                 if (DelayWatch.IsRunning)
@@ -435,14 +395,144 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
                     {
                         CurrentVibrationAmount[id] = amount;
 
+                        IsRequestPending = false;
+
                         return true;
                     }
                 }
+
+                IsRequestPending = false;
 
                 return false;
             }
             catch
             {
+                IsRequestPending = false;
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// A Simple "Vibrate This Much" Method Which Will Vibrate The Toy {x} Amount; Iterating Through The Amounts List Per The Delay From The Local Lovense Connect Server URL And ID Of The Toy.
+        /// </summary>
+        /// <param name="url">The Local Lovense Connect Server URL.</param>
+        /// <param name="id">The Toy ID - Fun Fact: This Is The Device's MAC Address.</param>
+        /// <param name="amounts">The Vibration Intensitys.</param>
+        /// <param name="DelayBetweenAmountsMilliseconds">The Delay Between Vibrations Defined In The Amounts.</param>
+        /// <returns></returns>
+        public async static Task<bool> VibrateToyWithPattern(string url, string id, List<int> amounts, float DelayBetweenAmountsMilliseconds = 300)
+        {
+            try
+            {
+                if (client == null)
+                {
+                    client = new WebClient();
+                }
+
+                string response = null;
+
+                if (Toys == null || Toys.Count == 0)
+                {
+                    return false;
+                }
+
+                IsRequestPending = true;
+
+                LovenseToy toy = Toys.Find(o => o.ToyID == id);
+
+                foreach (int amount in amounts)
+                {
+                    DelayWatch.Reset();
+
+                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
+
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        if (!response.ToLower().Contains("\"ok\""))
+                        {
+                            CurrentVibrationAmount[id] = amount;
+
+                            IsRequestPending = false;
+
+                            return false;
+                        }
+                    }
+
+                    if (toy.LovenseToyType == ToyType.Edge)
+                    {
+                        await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID);
+
+                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate2?v=" + amount + "&t=" + toy.ToyID);
+
+                        if (!string.IsNullOrEmpty(response))
+                        {
+                            if (!response.ToLower().Contains("\"ok\""))
+                            {
+                                CurrentVibrationAmount[id] = amount;
+
+                                IsRequestPending = false;
+
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
+
+                        if (!string.IsNullOrEmpty(response))
+                        {
+                            if (!response.ToLower().Contains("\"ok\""))
+                            {
+                                CurrentVibrationAmount[id] = amount;
+
+                                IsRequestPending = false;
+
+                                return false;
+                            }
+                        }
+                    }
+
+                    if (toy.LovenseToyType == ToyType.Max)
+                    {
+                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
+                    }
+                    else if (toy.LovenseToyType == ToyType.Nora)
+                    {
+                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID);
+                    }
+
+                    if (DelayWatch.IsRunning)
+                    {
+                        DelayWatch.Stop();
+
+                        LastKnownLatency = (int)DelayWatch.Elapsed.TotalMilliseconds;
+                    }
+
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        if (!response.ToLower().Contains("\"ok\""))
+                        {
+                            CurrentVibrationAmount[id] = amount;
+
+                            IsRequestPending = false;
+
+                            return false;
+                        }
+                    }
+
+                    await Task.Delay(TimeSpan.FromMilliseconds(DelayBetweenAmountsMilliseconds));
+                }
+
+                IsRequestPending = false;
+
+                return true;
+            }
+            catch
+            {
+                IsRequestPending = false;
+
                 return false;
             }
         }
