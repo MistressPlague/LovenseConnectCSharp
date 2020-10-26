@@ -53,9 +53,7 @@ namespace Real_Feel.LovenseConnectAPI
             Mission = 7,
             Nora = 8,
             Osci = 9,
-            Ferri = 10, // Unreleased - Single Motor Based
             Diamo = 11, // Unreleased - Single Motor Based
-            Quake = 12 // Unreleased - Single Motor Based
         }
 
         /// <summary>
