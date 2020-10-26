@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// The Namespace Of The Lovense Connect API; Created By Plague.
 /// </summary>
-namespace Lovense_VRChat_Tool.LovenseConnectAPI
+namespace Real_Feel.LovenseConnectAPI
 {
     /// <summary>
     /// The Main Class Of The Lovense Connect API; Created By Plague.
@@ -376,7 +376,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
 
                 if (toy.LovenseToyType == ToyType.Max)
                 {
-                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
+                    //response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
                 }
                 else if (toy.LovenseToyType == ToyType.Nora)
                 {
@@ -424,7 +424,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
         /// <param name="amounts">The Vibration Intensitys.</param>
         /// <param name="DelayBetweenAmountsMilliseconds">The Delay Between Vibrations Defined In The Amounts.</param>
         /// <returns></returns>
-        public async static Task<bool> VibrateToyWithPattern(string url, string id, List<int> amounts, float DelayBetweenAmountsMilliseconds = 300)
+        public async static Task<bool> VibrateToyWithPattern(string url, string id, List<int> amounts, float DelayBetweenAmountsMilliseconds = 200)
         {
             try
             {
@@ -499,7 +499,7 @@ namespace Lovense_VRChat_Tool.LovenseConnectAPI
 
                     if (toy.LovenseToyType == ToyType.Max)
                     {
-                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
+                        //response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
                     }
                     else if (toy.LovenseToyType == ToyType.Nora)
                     {
