@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -64,7 +63,7 @@ namespace Real_Feel.LovenseConnectAPI
         /// <summary>
         /// Toys Caching For Vibration To Function Efficiently.
         /// </summary>
-        private static List<LovenseToy> Toys = new List<LovenseToy>();
+        public static List<LovenseToy> Toys = new List<LovenseToy>();
 
         /// <summary>
         /// Gets A List Of Toys Connected To This Local Lovense Connect Server URL.
@@ -426,6 +425,11 @@ namespace Real_Feel.LovenseConnectAPI
         {
             try
             {
+                if (IsRequestPending)
+                {
+                    return false;
+                }
+
                 if (client == null)
                 {
                     client = new WebClient();
