@@ -373,7 +373,7 @@ namespace Real_Feel.LovenseConnectAPI
 
                 if (toy.LovenseToyType == ToyType.Max)
                 {
-                    //response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
+                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirAuto?v=" + RangeConv(amount, 0, 20, 0, 3) + "&t=" + toy.ToyID);
                 }
                 else if (toy.LovenseToyType == ToyType.Nora)
                 {
@@ -501,7 +501,7 @@ namespace Real_Feel.LovenseConnectAPI
 
                     if (toy.LovenseToyType == ToyType.Max)
                     {
-                        //response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirIn?&t=" + toy.ToyID);
+                        response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirAuto?v=" + RangeConv(amount, 0, 20, 0, 3) + "&t=" + toy.ToyID);
                     }
                     else if (toy.LovenseToyType == ToyType.Nora)
                     {
@@ -540,6 +540,11 @@ namespace Real_Feel.LovenseConnectAPI
 
                 return false;
             }
+        }
+
+        private static int RangeConv(int input, int MinPossibleInput, int MaxPossibleInput, int MinConv, int MaxConv)
+        {
+            return (((input - MinPossibleInput) * (MaxConv - MinConv)) / (MaxPossibleInput - MinPossibleInput)) + MinConv;
         }
     }
 }
