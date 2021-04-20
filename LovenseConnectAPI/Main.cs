@@ -2,17 +2,21 @@ using Newtonsoft.Json.Linq; // Tools > NuGet Package Manager > Package Manager C
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 
 /// <summary>
 /// The Namespace Of The Lovense Connect API; Created By Plague.
 /// </summary>
-namespace Real_Feel.LovenseConnectAPI
+
+namespace LovenseConnectAPI
 {
     /// <summary>
     /// The Main Class Of The Lovense Connect API; Created By Plague.
     /// </summary>
+    [Obfuscation(Exclude = true, ApplyToMembers = true, StripAfterObfuscation = true)]
     public class Main
     {
         /// <summary>
@@ -26,7 +30,7 @@ namespace Real_Feel.LovenseConnectAPI
             #endregion
 
             #region Useful Info
-            public ToyType LovenseToyType = ToyType.None;
+            public string LovenseToyType = "Unknown";
 
             public string BatteryPercentage = "0%";
             public bool ToyStatus = false;
@@ -38,31 +42,12 @@ namespace Real_Feel.LovenseConnectAPI
         }
 
         /// <summary>
-        /// The Type Of Toy - Returns The Name Which Is Assigned A Number.
-        /// </summary>
-        public enum ToyType
-        {
-            None = 0,
-            Ambi = 1,
-            Domi = 2,
-            Edge = 3,
-            Hush = 4,
-            Lush = 5,
-            Max = 6,
-            Mission = 7,
-            Nora = 8,
-            Osci = 9,
-            Ferri = 10,
-            Diamo = 11 // Unreleased - Single Motor Based
-        }
-
-        /// <summary>
         /// The Local WebClient To Send Requests.
         /// </summary>
         private static WebClient client = new WebClient();
 
         /// <summary>
-        /// Toys Caching For Vibration To Function Efficiently.
+        /// Toys Caching For Lovense To Function Efficiently.
         /// </summary>
         public static List<LovenseToy> Toys = new List<LovenseToy>();
 
@@ -71,7 +56,7 @@ namespace Real_Feel.LovenseConnectAPI
         /// </summary>
         /// <param name="url">The Local Lovense Connect Server URL.</param>
         /// <returns>A List Of Toys Connected To This Local Lovense Connect Server URL.</returns>
-        public async static Task<List<LovenseToy>> GetToys(string url)
+        public static async Task<List<LovenseToy>> GetToys(string url)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -83,7 +68,11 @@ namespace Real_Feel.LovenseConnectAPI
                 client = new WebClient();
             }
 
-            string response = await client.DownloadStringTaskAsync(new Uri(url.ToLower().Replace("/gettoys", "") + "/GetToys"));
+            IsRequestPending = true;
+
+            var response = await client.DownloadStringTaskAsync(new Uri(url.ToLower().Replace("/gettoys", "") + "/GetToys"));
+
+            IsRequestPending = false;
 
             if (!response.ToLower().Contains("\"ok\""))
             {
@@ -108,21 +97,16 @@ namespace Real_Feel.LovenseConnectAPI
 
             foreach (JProperty toyid in Data.Properties())
             {
-                if (toyid == null)
-                {
-                    continue;
-                }
-
                 string NickName = toyid.Value.Value<string>("nickName");
 
                 string FirmwareVersion = toyid.Value.Value<string>("fVersion");
 
-                ToyType Type = (ToyType)Enum.Parse(typeof(ToyType), toyid.Value.Value<string>("name"));
+                string Type = toyid.Value.Value<string>("name");
 
                 string ToyID = toyid.Value.Value<string>("id");
                 string BatteryPercentage = toyid.Value.Value<string>("battery") + "%";
                 string ToyVersion = toyid.Value.Value<string>("version");
-                bool ToyStatus = toyid.Value.Value<string>("status") == "0" ? false : true;
+                bool ToyStatus = toyid.Value.Value<string>("status") != "0";
 
                 _Toys.Add(new LovenseToy()
                 {
@@ -144,16 +128,9 @@ namespace Real_Feel.LovenseConnectAPI
                 });
             }
 
-            if (_Toys != null)
-            {
-                Toys = _Toys;
+            Toys = _Toys;
 
-                return _Toys;
-            }
-            else
-            {
-                return null;
-            }
+            return _Toys;
         }
 
         /// <summary>
@@ -162,91 +139,25 @@ namespace Real_Feel.LovenseConnectAPI
         /// <param name="url">The Local Lovense Connect Server URL.</param>
         /// <param name="id">The Toy ID - Fun Fact: This Is The Device's MAC Address.</param>
         /// <returns>The LovenseToy Instance Containing Info About The Toy, Such As Battery Percentage, Type, Etc.</returns>
-        public async static Task<LovenseToy> GetToyInfoFromID(string url, string id)
+        public static async Task<LovenseToy> GetToyInfoFromID(string url, string id)
         {
             if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(id))
             {
                 return null;
             }
 
-            if (client == null)
-            {
-                client = new WebClient();
-            }
-
-            string response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/GetToys");
-
-            if (!response.ToLower().Contains("\"ok\""))
-            {
-                return null;
-            }
-
-            if (response == "{}")
-            {
-                return null;
-            }
-
-            JObject JsonData = JObject.Parse(response);
-
-            if (JsonData.GetValue("code").ToString() != "200" || JsonData.GetValue("type").ToString().ToLower() != "ok")
-            {
-                return null;
-            }
-
-            List<LovenseToy> Toys = new List<LovenseToy>();
-
-            JObject Data = JObject.Parse(JsonData.GetValue("data").ToString());
-
-            foreach (JProperty toyid in Data.Properties())
-            {
-                if (toyid == null)
-                {
-                    continue;
-                }
-
-                string NickName = toyid.Value.Value<string>("nickName");
-
-                string FirmwareVersion = toyid.Value.Value<string>("fVersion");
-
-                ToyType Type = (ToyType)Enum.Parse(typeof(ToyType), toyid.Value.Value<string>("name"));
-
-                string ToyID = toyid.Value.Value<string>("id");
-                string BatteryPercentage = toyid.Value.Value<string>("battery") + "%";
-                string ToyVersion = toyid.Value.Value<string>("version");
-                bool ToyStatus = toyid.Value.Value<string>("status") == "0" ? false : true;
-
-                return new LovenseToy()
-                {
-                    #region Debug Info
-                    FirmwareVersion = FirmwareVersion,
-                    ToyVersion = ToyVersion,
-                    #endregion
-
-                    #region Useful Info
-                    LovenseToyType = Type,
-
-                    BatteryPercentage = BatteryPercentage,
-                    ToyStatus = ToyStatus,
-
-                    ToyID = ToyID,
-
-                    ToyNickName = NickName
-                    #endregion
-                };
-            }
-
-            return null;
+            return (await GetToys(url)).First(o => o.ToyID == id);
         }
 
         /// <summary>
-        /// The Current Vibration Amount Of All Toy IDs.
+        /// The Current Lovense Amount Of All Toy IDs.
         /// </summary>
-        private static Dictionary<string, int> CurrentVibrationAmount = new Dictionary<string, int>();
+        private static Dictionary<string, int> CurrentLovenseAmount = new Dictionary<string, int>();
 
         /// <summary>
-        /// Is A Vibration Request In Progress?
+        /// Is A Lovense Request In Progress?
         /// </summary>
-        private static bool IsRequestPending = false;
+        public static bool IsRequestPending = false;
 
         /// <summary>
         /// The Last Known Latency Recorded.
@@ -266,17 +177,17 @@ namespace Real_Feel.LovenseConnectAPI
         /// <param name="amount">The Vibration Intensity.</param>
         /// <param name="IgnoreDuplicateRequests">Whether To Ignore Duplicate Requests Or Not.</param>
         /// <returns></returns>
-        public async static Task<bool> VibrateToy(string url, string id, int amount, bool IgnoreDuplicateRequests = false)
+        public static async Task<bool> VibrateToy(string url, string id, int amount, bool IgnoreDuplicateRequests = false)
         {
             try
             {
                 if (IgnoreDuplicateRequests)
                 {
-                    if (CurrentVibrationAmount != null)
+                    if (CurrentLovenseAmount != null)
                     {
-                        if (CurrentVibrationAmount.ContainsKey(id))
+                        if (CurrentLovenseAmount.ContainsKey(id))
                         {
-                            if (CurrentVibrationAmount[id] == amount)
+                            if (CurrentLovenseAmount[id] == amount)
                             {
                                 return false;
                             }
@@ -299,8 +210,6 @@ namespace Real_Feel.LovenseConnectAPI
                     client = new WebClient();
                 }
 
-                string response = null;
-
                 DelayWatch.Reset();
 
                 if (Toys == null || Toys.Count == 0)
@@ -317,27 +226,25 @@ namespace Real_Feel.LovenseConnectAPI
                     DelayWatch.Start();
                 }
 
-                if (toy.LovenseToyType == ToyType.None)
+                if (toy.LovenseToyType == "Unknown")
                 {
                     IsRequestPending = false;
                     return false; // Assume Toy Disconnected
                 }
 
-                response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
+                var response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
 
                 if (!string.IsNullOrEmpty(response))
                 {
                     if (!response.ToLower().Contains("\"ok\""))
                     {
-                        CurrentVibrationAmount[id] = amount;
-
                         IsRequestPending = false;
 
                         return false;
                     }
                 }
 
-                if (toy.LovenseToyType == ToyType.Edge)
+                if (toy.LovenseToyType.ToLower().Contains("edge"))
                 {
                     await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID);
 
@@ -347,8 +254,6 @@ namespace Real_Feel.LovenseConnectAPI
                     {
                         if (!response.ToLower().Contains("\"ok\""))
                         {
-                            CurrentVibrationAmount[id] = amount;
-
                             IsRequestPending = false;
 
                             return false;
@@ -363,8 +268,6 @@ namespace Real_Feel.LovenseConnectAPI
                     {
                         if (!response.ToLower().Contains("\"ok\""))
                         {
-                            CurrentVibrationAmount[id] = amount;
-
                             IsRequestPending = false;
 
                             return false;
@@ -372,12 +275,14 @@ namespace Real_Feel.LovenseConnectAPI
                     }
                 }
 
-                if (toy.LovenseToyType == ToyType.Max)
+                if (toy.LovenseToyType.ToLower().Contains("max"))
                 {
+
                     response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirAuto?v=" + RangeConv(amount, 0, 20, 0, 3) + "&t=" + toy.ToyID);
                 }
-                else if (toy.LovenseToyType == ToyType.Nora)
+                else if (toy.LovenseToyType.ToLower().Contains("nora"))
                 {
+
                     response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID);
                 }
 
@@ -394,7 +299,10 @@ namespace Real_Feel.LovenseConnectAPI
                 {
                     if (response.ToLower().Contains("\"ok\""))
                     {
-                        CurrentVibrationAmount[id] = amount;
+                        if (CurrentLovenseAmount != null)
+                        {
+                            CurrentLovenseAmount[id] = amount;
+                        }
 
                         IsRequestPending = false;
 
@@ -420,9 +328,9 @@ namespace Real_Feel.LovenseConnectAPI
         /// <param name="url">The Local Lovense Connect Server URL.</param>
         /// <param name="id">The Toy ID - Fun Fact: This Is The Device's MAC Address.</param>
         /// <param name="amounts">The Vibration Intensitys.</param>
-        /// <param name="DelayBetweenAmountsMilliseconds">The Delay Between Vibrations Defined In The Amounts.</param>
+        /// <param name="DelayBetweenAmountsMilliseconds">The Delay Between Lovenses Defined In The Amounts.</param>
         /// <returns></returns>
-        public async static Task<bool> VibrateToyWithPattern(string url, string id, List<int> amounts, float DelayBetweenAmountsMilliseconds = 200)
+        public static async Task<bool> VibrateToyWithPattern(string url, string id, List<int> amounts, float DelayBetweenAmountsMilliseconds = 200)
         {
             try
             {
@@ -436,8 +344,6 @@ namespace Real_Feel.LovenseConnectAPI
                     client = new WebClient();
                 }
 
-                string response = null;
-
                 if (Toys == null || Toys.Count == 0)
                 {
                     return false;
@@ -445,27 +351,25 @@ namespace Real_Feel.LovenseConnectAPI
 
                 IsRequestPending = true;
 
-                LovenseToy toy = Toys.Find(o => o.ToyID == id);
+                var toy = Toys.Find(o => o.ToyID == id);
 
                 foreach (int amount in amounts)
                 {
                     DelayWatch.Reset();
 
-                    response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
+                    var response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate?v=" + amount + "&t=" + toy.ToyID);
 
                     if (!string.IsNullOrEmpty(response))
                     {
                         if (!response.ToLower().Contains("\"ok\""))
                         {
-                            CurrentVibrationAmount[id] = amount;
-
                             IsRequestPending = false;
 
                             return false;
                         }
                     }
 
-                    if (toy.LovenseToyType == ToyType.Edge)
+                    if (toy.LovenseToyType.ToLower().Contains("edge"))
                     {
                         await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Vibrate1?v=" + amount + "&t=" + toy.ToyID);
 
@@ -475,8 +379,6 @@ namespace Real_Feel.LovenseConnectAPI
                         {
                             if (!response.ToLower().Contains("\"ok\""))
                             {
-                                CurrentVibrationAmount[id] = amount;
-
                                 IsRequestPending = false;
 
                                 return false;
@@ -491,8 +393,6 @@ namespace Real_Feel.LovenseConnectAPI
                         {
                             if (!response.ToLower().Contains("\"ok\""))
                             {
-                                CurrentVibrationAmount[id] = amount;
-
                                 IsRequestPending = false;
 
                                 return false;
@@ -500,11 +400,11 @@ namespace Real_Feel.LovenseConnectAPI
                         }
                     }
 
-                    if (toy.LovenseToyType == ToyType.Max)
+                    if (toy.LovenseToyType.ToLower().Contains("max"))
                     {
                         response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/AirAuto?v=" + RangeConv(amount, 0, 20, 0, 3) + "&t=" + toy.ToyID);
                     }
-                    else if (toy.LovenseToyType == ToyType.Nora)
+                    else if (toy.LovenseToyType.ToLower().Contains("nora"))
                     {
                         response = await client.DownloadStringTaskAsync(url.ToLower().Replace("/gettoys", "") + "/Rotate?v=" + amount + "&t=" + toy.ToyID);
                     }
@@ -520,15 +420,18 @@ namespace Real_Feel.LovenseConnectAPI
                     {
                         if (!response.ToLower().Contains("\"ok\""))
                         {
-                            CurrentVibrationAmount[id] = amount;
-
                             IsRequestPending = false;
 
                             return false;
                         }
                     }
 
-                    await Task.Delay(TimeSpan.FromMilliseconds(DelayBetweenAmountsMilliseconds));
+                    CurrentLovenseAmount[id] = amount;
+
+                    if (amounts.Count > 1)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(DelayBetweenAmountsMilliseconds));
+                    }
                 }
 
                 IsRequestPending = false;
@@ -543,9 +446,9 @@ namespace Real_Feel.LovenseConnectAPI
             }
         }
 
-        private static int RangeConv(int input, int MinPossibleInput, int MaxPossibleInput, int MinConv, int MaxConv)
+        public static int RangeConv(float input, float MinPossibleInput, float MaxPossibleInput, float MinConv, float MaxConv)
         {
-            return (((input - MinPossibleInput) * (MaxConv - MinConv)) / (MaxPossibleInput - MinPossibleInput)) + MinConv;
+            return Convert.ToInt32((((input - MinPossibleInput) * (MaxConv - MinConv)) / (MaxPossibleInput - MinPossibleInput)) + MinConv);
         }
     }
 }
